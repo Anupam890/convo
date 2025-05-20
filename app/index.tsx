@@ -1,4 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as Haptics from 'expo-haptics';
 import { Link } from "expo-router";
 import React from "react";
 import {
@@ -68,7 +69,9 @@ export default function Index() {
               </TouchableOpacity>
             </Link>
             <Link href="/(auth)/register" asChild>
-              <TouchableOpacity className="border border-blue-500 py-4 rounded-2xl">
+              <TouchableOpacity className="border border-blue-500 py-4 rounded-2xl" onPress={()=>Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success
+              )}>
                 <Text className="text-blue-500 text-center font-semibold text-lg">
                   Create Account
                 </Text>

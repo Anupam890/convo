@@ -1,7 +1,9 @@
+import { useAuth } from "@/context/AuthContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -11,9 +13,8 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
 } from "react-native";
-
 
 type FormData = {
   name: string;
@@ -23,6 +24,7 @@ type FormData = {
 
 const Register = () => {
   const router = useRouter();
+  const { register, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [UserData, setUserData] = useState<FormData>({
     name: "",
@@ -30,7 +32,25 @@ const Register = () => {
     password: "",
   });
 
-  
+  const handleRegister = async () => {
+    if (!UserData.name || !UserData.email || !UserData.password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (UserData.password.length < 8) {
+      Alert.alert("Error", "Password must be at least 8 characters long");
+      return;
+    }
+
+    try {
+      await register(UserData.email, UserData.password, UserData.name);
+      router.replace("/");
+    } catch (error) {
+      Alert.alert("Error", "Failed to create account. Please try again.");
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
@@ -101,9 +121,13 @@ const Register = () => {
                     />
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity className="bg-blue-500 py-3 rounded-2xl mb-4">
+                <TouchableOpacity 
+                  className="bg-blue-500 py-3 rounded-2xl mb-4"
+                  onPress={handleRegister}
+                  disabled={isLoading}
+                >
                   <Text className="text-white text-center font-semibold">
-                    Create Account
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Text>
                 </TouchableOpacity>
               </View>

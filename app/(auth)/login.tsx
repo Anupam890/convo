@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -11,14 +12,46 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 const Login = () => {
   const router = useRouter();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please fill in all fields",
+        position: "top",
+      });
+      return;
+    }
+
+    try {
+      await login(email, password);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Successfully logged in",
+        position: "top",
+      });
+      router.replace("/");
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Invalid email or password",
+        position: "top",
+      });
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -41,9 +74,7 @@ const Login = () => {
                 resizeMode="contain"
               />
               <Text className="text-5xl font-extrabold mb-2">Welcome back</Text>
-              <Text className="text-gray-500 mb-6">
-                Sign in to continue
-              </Text>
+              <Text className="text-gray-500 mb-6">Sign in to continue</Text>
               <View className="w-full mb-4">
                 <View className="mb-4">
                   <TextInput
@@ -63,19 +94,25 @@ const Login = () => {
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                   />
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     className="absolute right-4 top-3"
                     onPress={() => setShowPassword(!showPassword)}
                   >
-                    <Ionicons 
-                      name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                      size={24} 
-                      color="gray" 
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={24}
+                      color="gray"
                     />
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity className="bg-blue-500 py-3 rounded-2xl mb-4">
-                  <Text className="text-white text-center font-semibold">Sign In</Text>
+                <TouchableOpacity
+                  className="bg-blue-500 py-3 rounded-2xl mb-4"
+                  onPress={handleLogin}
+                  disabled={isLoading}
+                >
+                  <Text className="text-white text-center font-semibold">
+                    {isLoading ? "Signing in..." : "Sign In"}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
