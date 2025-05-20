@@ -3,7 +3,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -13,8 +12,9 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 type FormData = {
   name: string;
@@ -34,20 +34,24 @@ const Register = () => {
 
   const handleRegister = async () => {
     if (!UserData.name || !UserData.email || !UserData.password) {
-      Alert.alert("Error", "Please fill in all fields");
+     Toast.show({
+      type: "error",
+      text1: "Error",
+      text2: "Please fill in all fields",
+      position: "top",
+     })
       return;
     }
-
-    if (UserData.password.length < 8) {
-      Alert.alert("Error", "Password must be at least 8 characters long");
-      return;
-    }
-
     try {
       await register(UserData.email, UserData.password, UserData.name);
       router.replace("/");
     } catch (error) {
-      Alert.alert("Error", "Failed to create account. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to create account",
+        position: "top",
+       })
     }
   };
 

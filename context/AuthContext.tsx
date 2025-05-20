@@ -27,17 +27,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setIsLoading(true);
       const newAccount = await account.create(
-        ID.unique(), 
+        ID.unique(),
         email,
         password,
         name
       );
-  
       if (newAccount) {
         await account.createSession(email, password);
+        await account.createVerification("#");
         const userData = await account.get();
         setUser({
-          id: userData.$id,
+          id: ID.unique(),
           name: userData.name,
           email: userData.email,
         });
@@ -49,7 +49,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
     }
   };
-  
 
   const login = async (email: string, password: string) => {
     try {
@@ -57,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await account.createSession(email, password);
       const userData = await account.get();
       setUser({
-        id: userData.$id,
+        id: ID.unique(),
         name: userData.name,
         email: userData.email,
       });
@@ -83,15 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        register,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isLoading, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
