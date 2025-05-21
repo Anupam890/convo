@@ -1,4 +1,4 @@
-
+import { useSignUp } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -12,8 +12,9 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 type FormData = {
   name: string;
@@ -23,16 +24,81 @@ type FormData = {
 
 const Register = () => {
   const router = useRouter();
+  const { isLoaded, signUp, setActive } = useSignUp();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [UserData, setUserData] = useState<FormData>({
+  const [userData, setUserData] = useState<FormData>({
     name: "",
     email: "",
     password: "",
   });
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState("");
 
   const handleRegister = async () => {
-    
+    if (!isLoaded) return;
+
+    try {
+      await signUp.create({
+        emailAddress: userData.email,
+        password: userData.password,
+      });
+
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setPendingVerification(true);
+    } catch (err) {
+      console.error("Sign-up Error:", JSON.stringify(err, null, 2));
+    }
   };
+
+  const handleVerify = async () => {
+    if (!isLoaded) return;
+
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code });
+
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        router.replace("/(auth)/login");
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: "Successfully verified email",
+          position: "top",
+        });
+      } else {
+       Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to verify email",
+        position: "top",
+       })
+      }
+    } catch (err) {
+      console.error("Verification Error:", JSON.stringify(err, null, 2));
+    }
+  };
+
+  if (pendingVerification) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center px-6">
+        <Text className="text-2xl font-bold mb-4">Verify Your Email</Text>
+        <TextInput
+          className="border border-gray-300 px-4 py-3 rounded-2xl w-full mb-4"
+          placeholder="Enter verification code"
+          value={code}
+          onChangeText={setCode}
+          keyboardType="number-pad"
+        />
+        <TouchableOpacity
+          className="bg-blue-500 py-3 rounded-2xl w-full"
+          onPress={handleVerify}
+        >
+          <Text className="text-white text-center font-semibold">Verify</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -60,36 +126,33 @@ const Register = () => {
               <Text className="text-gray-500 mb-6">
                 Create an account to get started
               </Text>
+
               <View className="w-full mb-4">
-                <View className="mb-4">
-                  <TextInput
-                    className="border border-gray-300 px-4 py-3 rounded-2xl"
-                    placeholder="Full Name"
-                    value={UserData.name}
-                    onChangeText={(text) =>
-                      setUserData({ ...UserData, name: text })
-                    }
-                  />
-                </View>
-                <View className="mb-4">
-                  <TextInput
-                    className="border border-gray-300 px-4 py-3 rounded-2xl"
-                    placeholder="Email"
-                    value={UserData.email}
-                    onChangeText={(text) =>
-                      setUserData({ ...UserData, email: text })
-                    }
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                </View>
+                <TextInput
+                  className="border border-gray-300 px-4 py-3 rounded-2xl mb-4"
+                  placeholder="Full Name"
+                  value={userData.name}
+                  onChangeText={(text) =>
+                    setUserData({ ...userData, name: text })
+                  }
+                />
+                <TextInput
+                  className="border border-gray-300 px-4 py-3 rounded-2xl mb-4"
+                  placeholder="Email"
+                  value={userData.email}
+                  onChangeText={(text) =>
+                    setUserData({ ...userData, email: text })
+                  }
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
                 <View className="mb-4 relative">
                   <TextInput
                     className="border border-gray-300 px-4 py-3 rounded-2xl"
                     placeholder="Password"
-                    value={UserData.password}
+                    value={userData.password}
                     onChangeText={(text) =>
-                      setUserData({ ...UserData, password: text })
+                      setUserData({ ...userData, password: text })
                     }
                     secureTextEntry={!showPassword}
                   />
@@ -104,13 +167,12 @@ const Register = () => {
                     />
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity 
+                <TouchableOpacity
                   className="bg-blue-500 py-3 rounded-2xl mb-4"
                   onPress={handleRegister}
-                  
                 >
                   <Text className="text-white text-center font-semibold">
-                  Create Account
+                    Create Account
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -127,17 +189,16 @@ const Register = () => {
                   Sign in with Google
                 </Text>
               </TouchableOpacity>
-              <View>
-                <Text className="text-gray-500 mt-4">
-                  Already have an account?{" "}
-                  <Text
-                    className="text-blue-500"
-                    onPress={() => router.push("/(auth)/login")}
-                  >
-                    Sign in
-                  </Text>
+
+              <Text className="text-gray-500 mt-4">
+                Already have an account?{" "}
+                <Text
+                  className="text-blue-500"
+                  onPress={() => router.push("/(auth)/login")}
+                >
+                  Sign in
                 </Text>
-              </View>
+              </Text>
             </View>
           </View>
         </TouchableWithoutFeedback>
