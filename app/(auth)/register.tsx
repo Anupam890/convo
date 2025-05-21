@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -14,7 +14,6 @@ import {
   TouchableWithoutFeedback,
   View
 } from "react-native";
-import Toast from "react-native-toast-message";
 
 type FormData = {
   name: string;
@@ -24,7 +23,6 @@ type FormData = {
 
 const Register = () => {
   const router = useRouter();
-  const { register, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [UserData, setUserData] = useState<FormData>({
     name: "",
@@ -33,26 +31,7 @@ const Register = () => {
   });
 
   const handleRegister = async () => {
-    if (!UserData.name || !UserData.email || !UserData.password) {
-     Toast.show({
-      type: "error",
-      text1: "Error",
-      text2: "Please fill in all fields",
-      position: "top",
-     })
-      return;
-    }
-    try {
-      await register(UserData.email, UserData.password, UserData.name);
-      router.replace("/");
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Failed to create account",
-        position: "top",
-       })
-    }
+    
   };
 
   return (
@@ -128,10 +107,10 @@ const Register = () => {
                 <TouchableOpacity 
                   className="bg-blue-500 py-3 rounded-2xl mb-4"
                   onPress={handleRegister}
-                  disabled={isLoading}
+                  
                 >
                   <Text className="text-white text-center font-semibold">
-                    {isLoading ? "Creating Account..." : "Create Account"}
+                  Create Account
                   </Text>
                 </TouchableOpacity>
               </View>

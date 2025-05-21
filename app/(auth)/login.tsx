@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -14,43 +14,16 @@ import {
   TouchableWithoutFeedback,
   View
 } from "react-native";
-import Toast from "react-native-toast-message";
+
 
 const Login = () => {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please fill in all fields",
-        position: "top",
-      });
-      return;
-    }
-
-    try {
-      await login(email, password);
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Successfully logged in",
-        position: "top",
-      });
-      router.replace("/");
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Invalid email or password",
-        position: "top",
-      });
-    }
+   
   };
 
   return (
@@ -108,10 +81,10 @@ const Login = () => {
                 <TouchableOpacity
                   className="bg-blue-500 py-3 rounded-2xl mb-4"
                   onPress={handleLogin}
-                  disabled={isLoading}
+                 
                 >
                   <Text className="text-white text-center font-semibold">
-                    {isLoading ? "Signing in..." : "Sign In"}
+                   Login
                   </Text>
                 </TouchableOpacity>
               </View>
