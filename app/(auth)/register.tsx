@@ -1,5 +1,6 @@
 import { useSSO } from "@clerk/clerk-expo";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as AuthSession from "expo-auth-session";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
@@ -36,19 +37,53 @@ const Register = () => {
   const router = useRouter();
   const { startSSOFlow, setActive } = useSSO();
 
-  const handleRegister = async () => {
+  const handleEmailRegister = async () => {
+    const { fullName, email, password } = userData;
+
+    if (!fullName || !email || !password) {
+      Toast.show({
+        type: "error",
+        text1: "All fields are required",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
-      const { createdSessionId } = await startSSOFlow({
-        strategy: "oauth_google",
-      });
-      if (createdSessionId) {
-        setActive({ session: createdSessionId });
-      }
+      // Simulate registration or call your backend logic here
+      setTimeout(() => {
+        Toast.show({
+          type: "success",
+          text1: "Account created!",
+        });
+        router.replace("/(auth)/login");
+      }, 1000);
     } catch (error) {
       Toast.show({
         type: "error",
         text1: "Registration failed",
+        text2: "Something went wrong. Try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      setLoading(true);
+      const { createdSessionId } = await startSSOFlow({
+        strategy: "oauth_google",
+        redirectUrl: AuthSession.makeRedirectUri(),
+      });
+
+      if (createdSessionId) {
+        await setActive({ session: createdSessionId });
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Google sign-in failed",
         text2: "Please try again",
       });
     } finally {
@@ -76,7 +111,9 @@ const Register = () => {
                 className="w-72 h-72 mb-6"
                 resizeMode="contain"
               />
-              <Text className="text-5xl font-extrabold mb-2">Create Account</Text>
+              <Text className="text-5xl font-extrabold mb-2">
+                Create Account
+              </Text>
               <Text className="text-gray-500 mb-6">
                 Create an account to get started
               </Text>
@@ -122,7 +159,9 @@ const Register = () => {
                   </TouchableOpacity>
                 </View>
                 <TouchableOpacity
-                 className="bg-blue-500 py-3 rounded-2xl mb-4"
+                  className="bg-blue-500 py-3 rounded-2xl mb-4"
+                  onPress={handleEmailRegister}
+                  disabled={loading}
                 >
                   <Text className="text-white text-center font-semibold">
                     {loading ? "Creating Account..." : "Create Account"}
@@ -138,7 +177,7 @@ const Register = () => {
 
               <TouchableOpacity
                 className="flex-row items-center border border-gray-300 px-4 py-3 rounded-2xl"
-                onPress={handleRegister}
+                onPress={handleGoogleSignup}
                 disabled={loading}
               >
                 <Ionicons name="logo-google" size={24} color="#4285F4" />
@@ -157,6 +196,7 @@ const Register = () => {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+      <Toast />
     </SafeAreaView>
   );
 };
