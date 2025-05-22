@@ -1,7 +1,8 @@
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import React from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import "./global.css";
 
@@ -16,7 +17,11 @@ export default function RootLayout() {
     <>
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoaded>
-          <Slot />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(chat)" options={{ title: "Chat" }} />
+            </Stack>
+          </GestureHandlerRootView>
         </ClerkLoaded>
         <Toast />
       </ClerkProvider>

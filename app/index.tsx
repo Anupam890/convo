@@ -61,7 +61,7 @@ export default function Index() {
           </View>
 
           <View className="w-full space-y-4 gap-2">
-            <Link href="/(auth)/login" asChild>
+            <Link href="/(chat)/chats" asChild>
               <TouchableOpacity className="bg-blue-500 py-4 rounded-2xl">
                 <Text className="text-white text-center font-semibold text-lg">
                   Get Started
