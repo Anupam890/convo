@@ -1,27 +1,25 @@
-import { ClerkProvider } from '@clerk/clerk-expo';
-import { tokenCache } from '@clerk/clerk-expo/token-cache';
-import { Stack } from "expo-router";
-import React from 'react';
-import { StatusBar } from "react-native";
+import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
+import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { Slot } from "expo-router";
+import React from "react";
 import Toast from "react-native-toast-message";
 import "./global.css";
 
 export default function RootLayout() {
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+  if (!publishableKey) {
+    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file");
+  }
+
   return (
-   <>
-   <ClerkProvider tokenCache={tokenCache}>
-   <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(chat)" options={{ headerShown: false }} />
-    </Stack>
-    <Toast />
-   </ClerkProvider>
-   </>
+    <>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+        <ClerkLoaded>
+          <Slot />
+        </ClerkLoaded>
+        <Toast />
+      </ClerkProvider>
+    </>
   );
 }
